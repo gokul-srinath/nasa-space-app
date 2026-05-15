@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   } catch (err) {
     return NextResponse.json(
-      { error: "Failed to fetch NASA climate data: " + String(err) },
+      { error: "Failed to fetch NASA climate data - " + String(err) },
       { status: 500 }
     );
   }
