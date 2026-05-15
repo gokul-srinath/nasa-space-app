@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(url, { next: { revalidate: 3600 } });
+    // console.log(await res.json());
     if (!res.ok) {
       return NextResponse.json(
         { error: `NASA API returned ${res.status}` },
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest) {
       );
     }
     const data = await res.json();
+    console.log(data);
     return NextResponse.json(data);
   } catch (err) {
     return NextResponse.json(

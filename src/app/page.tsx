@@ -12,6 +12,21 @@ const LOCATIONS = [
   { label: "Sydney, Australia", lat: "-33.9", lon: "151.2" },
 ] as const;
 
+const MONTH_KEYS = [
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MAY",
+  "JUN",
+  "JUL",
+  "AUG",
+  "SEP",
+  "OCT",
+  "NOV",
+  "DEC",
+] as const;
+
 const MONTH_LABELS = [
   "Jan",
   "Feb",
@@ -41,8 +56,6 @@ function ClimatologyGrid({
 
   if (!temp) return null;
 
-  const months = MONTH_LABELS.map((_, i) => String(i + 1));
-
   return (
     <div className="space-y-8">
       {/* Temperature Chart */}
@@ -51,16 +64,16 @@ function ClimatologyGrid({
           Monthly Average Temperature (°C)
         </h3>
         <div className="flex items-end gap-1.5 h-48">
-          {months.map((m) => {
-            const val = temp[m] ?? 0;
-            const max = tempMax?.[m] ?? val;
-            const min = tempMin?.[m] ?? val;
+          {MONTH_KEYS.map((key, i) => {
+            const val = temp[key] ?? 0;
+            const max = tempMax?.[key] ?? val;
+            const min = tempMin?.[key] ?? val;
             const barHeight = Math.max(((val + 10) / 55) * 100, 4);
             const hue = val < 0 ? 210 : val < 15 ? 190 : val < 25 ? 30 : 0;
             const sat = Math.min(80, 40 + Math.abs(val) * 2);
             return (
               <div
-                key={m}
+                key={key}
                 className="flex-1 flex flex-col items-center gap-1 group"
               >
                 <div className="text-[10px] text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -75,7 +88,7 @@ function ClimatologyGrid({
                   title={`Avg: ${val.toFixed(1)}°C | Max: ${max.toFixed(1)}°C | Min: ${min.toFixed(1)}°C`}
                 />
                 <span className="text-[10px] font-mono text-zinc-500">
-                  {MONTH_LABELS[Number(m) - 1]}
+                  {MONTH_LABELS[i]}
                 </span>
               </div>
             );
@@ -87,25 +100,25 @@ function ClimatologyGrid({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           label="Avg Temperature"
-          value={`${temp["13"]?.toFixed(1) ?? "—"}°C`}
+          value={`${temp.ANN?.toFixed(1) ?? "—"}°C`}
           sub="Annual mean"
           color="text-amber-400"
         />
         <StatCard
           label="Precipitation"
-          value={`${precip?.["13"]?.toFixed(1) ?? "—"} mm/day`}
+          value={`${precip?.ANN?.toFixed(1) ?? "—"} mm/day`}
           sub="Annual mean"
           color="text-blue-400"
         />
         <StatCard
           label="Humidity"
-          value={`${humidity?.["13"]?.toFixed(1) ?? "—"}%`}
+          value={`${humidity?.ANN?.toFixed(1) ?? "—"}%`}
           sub="Relative, 2m"
           color="text-emerald-400"
         />
         <StatCard
           label="Wind Speed"
-          value={`${wind?.["13"]?.toFixed(1) ?? "—"} m/s`}
+          value={`${wind?.ANN?.toFixed(1) ?? "—"} m/s`}
           sub="At 2m height"
           color="text-violet-400"
         />
@@ -117,16 +130,16 @@ function ClimatologyGrid({
           Monthly Precipitation (mm/day)
         </h3>
         <div className="flex items-end gap-1.5 h-36">
-          {months.map((m) => {
-            const val = precip?.[m] ?? 0;
+          {MONTH_KEYS.map((key, i) => {
+            const val = precip?.[key] ?? 0;
             const maxPrecip = Math.max(
-              ...months.map((mo) => precip?.[mo] ?? 0),
+              ...MONTH_KEYS.map((k) => precip?.[k] ?? 0),
               1
             );
             const barHeight = Math.max((val / maxPrecip) * 100, 2);
             return (
               <div
-                key={m}
+                key={key}
                 className="flex-1 flex flex-col items-center gap-1 group"
               >
                 <div className="text-[10px] text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -138,7 +151,7 @@ function ClimatologyGrid({
                   title={`${val.toFixed(2)} mm/day`}
                 />
                 <span className="text-[10px] font-mono text-zinc-500">
-                  {MONTH_LABELS[Number(m) - 1]}
+                  {MONTH_LABELS[i]}
                 </span>
               </div>
             );
@@ -175,31 +188,29 @@ function ClimatologyGrid({
             </tr>
           </thead>
           <tbody>
-            {months.map((m) => (
+            {MONTH_KEYS.map((key, i) => (
               <tr
-                key={m}
+                key={key}
                 className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors"
               >
-                <td className="p-3 text-zinc-300">
-                  {MONTH_LABELS[Number(m) - 1]}
+                <td className="p-3 text-zinc-300">{MONTH_LABELS[i]}</td>
+                <td className="p-3 text-right font-mono text-zinc-300">
+                  {temp[key]?.toFixed(1)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {temp[m]?.toFixed(1)}
+                  {tempMax?.[key]?.toFixed(1)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {tempMax?.[m]?.toFixed(1)}
+                  {tempMin?.[key]?.toFixed(1)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {tempMin?.[m]?.toFixed(1)}
+                  {precip?.[key]?.toFixed(2)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {precip?.[m]?.toFixed(2)}
+                  {humidity?.[key]?.toFixed(1)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {humidity?.[m]?.toFixed(1)}
-                </td>
-                <td className="p-3 text-right font-mono text-zinc-300">
-                  {wind?.[m]?.toFixed(1)}
+                  {wind?.[key]?.toFixed(1)}
                 </td>
               </tr>
             ))}
