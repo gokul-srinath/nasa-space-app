@@ -63,26 +63,27 @@ function ClimatologyGrid({
         <h3 className="text-sm font-medium text-zinc-400 mb-4">
           Monthly Average Temperature (°C)
         </h3>
-        <div className="flex items-end gap-1.5 h-48">
+        <div className="flex items-end gap-1.5" style={{ height: 192 }}>
           {MONTH_KEYS.map((key, i) => {
             const val = temp[key] ?? 0;
             const max = tempMax?.[key] ?? val;
             const min = tempMin?.[key] ?? val;
-            const barHeight = Math.max(((val + 10) / 55) * 100, 4);
+            const barPx = Math.max(((val + 10) / 55) * 160, 6);
             const hue = val < 0 ? 210 : val < 15 ? 190 : val < 25 ? 30 : 0;
             const sat = Math.min(80, 40 + Math.abs(val) * 2);
             return (
               <div
                 key={key}
-                className="flex-1 flex flex-col items-center gap-1 group"
+                className="flex-1 flex flex-col items-center justify-end gap-1 group"
+                style={{ height: "100%" }}
               >
                 <div className="text-[10px] text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
                   {max.toFixed(1)}°
                 </div>
                 <div
-                  className="w-full rounded-t-md transition-all duration-300 hover:opacity-80 relative"
+                  className="w-full rounded-t-md transition-all duration-300 hover:opacity-80"
                   style={{
-                    height: `${barHeight}%`,
+                    height: barPx,
                     backgroundColor: `hsl(${hue}, ${sat}%, 55%)`,
                   }}
                   title={`Avg: ${val.toFixed(1)}°C | Max: ${max.toFixed(1)}°C | Min: ${min.toFixed(1)}°C`}
@@ -129,25 +130,26 @@ function ClimatologyGrid({
         <h3 className="text-sm font-medium text-zinc-400 mb-4">
           Monthly Precipitation (mm/day)
         </h3>
-        <div className="flex items-end gap-1.5 h-36">
+        <div className="flex items-end gap-1.5" style={{ height: 144 }}>
           {MONTH_KEYS.map((key, i) => {
             const val = precip?.[key] ?? 0;
             const maxPrecip = Math.max(
               ...MONTH_KEYS.map((k) => precip?.[k] ?? 0),
               1
             );
-            const barHeight = Math.max((val / maxPrecip) * 100, 2);
+            const barPx = Math.max((val / maxPrecip) * 120, 3);
             return (
               <div
                 key={key}
-                className="flex-1 flex flex-col items-center gap-1 group"
+                className="flex-1 flex flex-col items-center justify-end gap-1 group"
+                style={{ height: "100%" }}
               >
                 <div className="text-[10px] text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
                   {val.toFixed(1)}
                 </div>
                 <div
                   className="w-full rounded-t-md bg-blue-500/80 transition-all duration-300 hover:bg-blue-400"
-                  style={{ height: `${barHeight}%` }}
+                  style={{ height: barPx }}
                   title={`${val.toFixed(2)} mm/day`}
                 />
                 <span className="text-[10px] font-mono text-zinc-500">
