@@ -37,7 +37,6 @@ export async function GET(request: NextRequest) {
       );
     }
     const data = await res.json();
-    console.log(data);
     return NextResponse.json(data);
   } catch (err) {
     return NextResponse.json(
