@@ -29,3 +29,27 @@ export function useClimateData(params: ClimateParams) {
     queryFn: () => fetchClimate(params),
   });
 }
+
+export interface ApodData {
+  title: string;
+  explanation: string;
+  url: string;
+  hdurl?: string;
+  media_type: string;
+  date: string;
+  copyright?: string;
+}
+
+async function fetchApod(): Promise<ApodData> {
+  const res = await fetch("/api/apod");
+  if (!res.ok) throw new Error("Failed to fetch APOD");
+  return res.json();
+}
+
+export function useApod() {
+  return useQuery({
+    queryKey: ["apod"],
+    queryFn: fetchApod,
+    staleTime: 60 * 60 * 1000,
+  });
+}

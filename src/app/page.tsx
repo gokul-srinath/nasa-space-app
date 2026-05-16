@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useClimateData } from "@/lib/hooks";
+import { useClimateData, useApod } from "@/lib/hooks";
 
 const LOCATIONS = [
   { label: "Cape Canaveral, FL", lat: "28.6", lon: "-80.6" },
@@ -261,6 +261,8 @@ export default function Home() {
     type: "climatology",
   });
 
+  const { data: apod } = useApod();
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
@@ -289,6 +291,36 @@ export default function Home() {
           </a>
         </div>
       </header>
+
+      {/* APOD Banner */}
+      {apod && apod.media_type === "image" && (
+        <div className="relative overflow-hidden border-b border-zinc-800">
+          <img
+            src={apod.url}
+            alt={apod.title}
+            className="w-full h-48 object-cover opacity-40"
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 px-6 pb-4">
+            <div className="max-w-5xl mx-auto">
+              <p className="text-[10px] uppercase tracking-widest text-blue-400 mb-1">
+                Astronomy Picture of the Day
+              </p>
+              <p className="text-sm font-medium text-zinc-100">
+                {apod.title}
+              </p>
+              <p className="text-[11px] text-zinc-400 mt-1 line-clamp-2 max-w-2xl">
+                {apod.explanation}
+              </p>
+              {apod.copyright && (
+                <p className="text-[10px] text-zinc-600 mt-1">
+                  &copy; {apod.copyright}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main */}
       <main className="flex-1 px-6 py-8">
