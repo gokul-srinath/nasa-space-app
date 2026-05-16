@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(url, { next: { revalidate: 3600 } });
+    // console.log(await res.json());
     if (!res.ok) {
       return NextResponse.json(
         { error: `NASA API returned ${res.status}` },
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   } catch (err) {
     return NextResponse.json(
-      { error: "Failed to fetch NASA climate data", detail: String(err) },
+      { error: "Failed to fetch NASA climate data - " + String(err) },
       { status: 500 }
     );
   }
