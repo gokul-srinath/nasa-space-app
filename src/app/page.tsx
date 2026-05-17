@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useClimateData, useApod } from "@/lib/hooks";
+import { formatTemp, type TemperatureUnit } from "@/lib/temperature";
 
 const LOCATIONS = [
   { label: "Cape Canaveral, FL", lat: "28.6", lon: "-80.6" },
@@ -42,11 +43,12 @@ const MONTH_LABELS = [
   "Dec",
 ];
 
-function ClimatologyGrid({
-  parameters,
-}: {
+interface ClimatologyGridProps {
   parameters: Record<string, Record<string, number>>;
-}) {
+  unit: TemperatureUnit;
+}
+
+function ClimatologyGrid({ parameters, unit }: ClimatologyGridProps) {
   const temp = parameters?.T2M;
   const tempMax = parameters?.T2M_MAX;
   const tempMin = parameters?.T2M_MIN;
@@ -61,7 +63,7 @@ function ClimatologyGrid({
       {/* Temperature Chart */}
       <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
         <h3 className="text-sm font-medium text-zinc-400 mb-4">
-          Monthly Average Temperature (°C)
+          Monthly Average Temperature (°{unit})
         </h3>
         <div className="flex items-end gap-1.5" style={{ height: 192 }}>
           {MONTH_KEYS.map((key, i) => {
@@ -78,7 +80,7 @@ function ClimatologyGrid({
                 style={{ height: "100%" }}
               >
                 <div className="text-[10px] text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {max.toFixed(1)}°
+                  {formatTemp(max, unit)}
                 </div>
                 <div
                   className="w-full rounded-t-md transition-all duration-300 hover:opacity-80"
@@ -86,7 +88,7 @@ function ClimatologyGrid({
                     height: barPx,
                     backgroundColor: `hsl(${hue}, ${sat}%, 55%)`,
                   }}
-                  title={`Avg: ${val.toFixed(1)}°C | Max: ${max.toFixed(1)}°C | Min: ${min.toFixed(1)}°C`}
+                  title={`Avg: ${formatTemp(val, unit)} | Max: ${formatTemp(max, unit)} | Min: ${formatTemp(min, unit)}`}
                 />
                 <span className="text-[10px] font-mono text-zinc-500">
                   {MONTH_LABELS[i]}
@@ -101,7 +103,7 @@ function ClimatologyGrid({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           label="Avg Temperature"
-          value={`${temp.ANN?.toFixed(1) ?? "—"}°C`}
+          value={formatTemp(temp.ANN, unit)}
           sub="Annual mean"
           color="text-amber-400"
         />
@@ -170,13 +172,13 @@ function ClimatologyGrid({
                 Month
               </th>
               <th className="text-right p-3 text-zinc-400 font-medium">
-                Temp °C
+                Temp °{unit}
               </th>
               <th className="text-right p-3 text-zinc-400 font-medium">
-                Max °C
+                Max °{unit}
               </th>
               <th className="text-right p-3 text-zinc-400 font-medium">
-                Min °C
+                Min °{unit}
               </th>
               <th className="text-right p-3 text-zinc-400 font-medium">
                 Rain mm/d
@@ -197,13 +199,13 @@ function ClimatologyGrid({
               >
                 <td className="p-3 text-zinc-300">{MONTH_LABELS[i]}</td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {temp[key]?.toFixed(1)}
+                  {formatTemp(temp[key], unit)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {tempMax?.[key]?.toFixed(1)}
+                  {formatTemp(tempMax?.[key], unit)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {tempMin?.[key]?.toFixed(1)}
+                  {formatTemp(tempMin?.[key], unit)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
                   {precip?.[key]?.toFixed(2)}
@@ -253,6 +255,7 @@ function Spinner() {
 
 export default function Home() {
   const [locationIdx, setLocationIdx] = useState(0);
+  const [tempUnit, setTempUnit] = useState<TemperatureUnit>("C");
   const loc = LOCATIONS[locationIdx];
 
   const { data, isLoading, isError, error } = useClimateData({
@@ -281,14 +284,24 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <a
-            href="https://power.larc.nasa.gov/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            Data Source ↗
-          </a>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setTempUnit((u) => (u === "C" ? "F" : "C"))}
+              className="flex items-center gap-1 rounded-full border border-zinc-700 px-2.5 py-1 text-xs font-medium transition-colors hover:border-zinc-500"
+            >
+              <span className={tempUnit === "C" ? "text-blue-400" : "text-zinc-500"}>°C</span>
+              <span className="text-zinc-600">/</span>
+              <span className={tempUnit === "F" ? "text-orange-400" : "text-zinc-500"}>°F</span>
+            </button>
+            <a
+              href="https://power.larc.nasa.gov/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              Data Source ↗
+            </a>
+          </div>
         </div>
       </header>
 
@@ -357,7 +370,7 @@ export default function Home() {
           )}
 
           {data?.properties?.parameter && (
-            <ClimatologyGrid parameters={data.properties.parameter} />
+            <ClimatologyGrid parameters={data.properties.parameter} unit={tempUnit} />
           )}
         </div>
       </main>
