@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useClimateData, useApod } from "@/lib/hooks";
+import { formatTemp, type TemperatureUnit } from "@/lib/temperature";
 
 const LOCATIONS = [
   { label: "Cape Canaveral, FL", lat: "28.6", lon: "-80.6" },
@@ -42,13 +43,12 @@ const MONTH_LABELS = [
   "Dec",
 ];
 
-function ClimatologyGrid({
-  parameters,
-  unit,
-}: {
+interface ClimatologyGridProps {
   parameters: Record<string, Record<string, number>>;
-  unit: "C" | "F";
-}) {
+  unit: TemperatureUnit;
+}
+
+function ClimatologyGrid({ parameters, unit }: ClimatologyGridProps) {
   const temp = parameters?.T2M;
   const tempMax = parameters?.T2M_MAX;
   const tempMin = parameters?.T2M_MIN;
@@ -67,12 +67,12 @@ function ClimatologyGrid({
         </h3>
         <div className="flex items-end gap-1.5" style={{ height: 192 }}>
           {MONTH_KEYS.map((key, i) => {
-            const valC = temp[key] ?? 0;
-            const maxC = tempMax?.[key] ?? valC;
-            const minC = tempMin?.[key] ?? valC;
-            const barPx = Math.max(((valC + 10) / 55) * 160, 6);
-            const hue = valC < 0 ? 210 : valC < 15 ? 190 : valC < 25 ? 30 : 0;
-            const sat = Math.min(80, 40 + Math.abs(valC) * 2);
+            const val = temp[key] ?? 0;
+            const max = tempMax?.[key] ?? val;
+            const min = tempMin?.[key] ?? val;
+            const barPx = Math.max(((val + 10) / 55) * 160, 6);
+            const hue = val < 0 ? 210 : val < 15 ? 190 : val < 25 ? 30 : 0;
+            const sat = Math.min(80, 40 + Math.abs(val) * 2);
             return (
               <div
                 key={key}
@@ -80,7 +80,7 @@ function ClimatologyGrid({
                 style={{ height: "100%" }}
               >
                 <div className="text-[10px] text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {formatTemp(maxC, unit)}
+                  {formatTemp(max, unit)}
                 </div>
                 <div
                   className="w-full rounded-t-md transition-all duration-300 hover:opacity-80"
@@ -88,7 +88,7 @@ function ClimatologyGrid({
                     height: barPx,
                     backgroundColor: `hsl(${hue}, ${sat}%, 55%)`,
                   }}
-                  title={`Avg: ${formatTemp(valC, unit)} | Max: ${formatTemp(maxC, unit)} | Min: ${formatTemp(minC, unit)}`}
+                  title={`Avg: ${formatTemp(val, unit)} | Max: ${formatTemp(max, unit)} | Min: ${formatTemp(min, unit)}`}
                 />
                 <span className="text-[10px] font-mono text-zinc-500">
                   {MONTH_LABELS[i]}
@@ -103,7 +103,7 @@ function ClimatologyGrid({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
           label="Avg Temperature"
-          value={temp.ANN != null ? formatTemp(temp.ANN, unit) : "—"}
+          value={formatTemp(temp.ANN, unit)}
           sub="Annual mean"
           color="text-amber-400"
         />
@@ -199,13 +199,13 @@ function ClimatologyGrid({
               >
                 <td className="p-3 text-zinc-300">{MONTH_LABELS[i]}</td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {temp[key] != null ? formatTemp(temp[key], unit) : "—"}
+                  {formatTemp(temp[key], unit)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {tempMax?.[key] != null ? formatTemp(tempMax[key], unit) : "—"}
+                  {formatTemp(tempMax?.[key], unit)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
-                  {tempMin?.[key] != null ? formatTemp(tempMin[key], unit) : "—"}
+                  {formatTemp(tempMin?.[key], unit)}
                 </td>
                 <td className="p-3 text-right font-mono text-zinc-300">
                   {precip?.[key]?.toFixed(2)}
@@ -253,18 +253,9 @@ function Spinner() {
   );
 }
 
-function toFahrenheit(c: number) {
-  return c * 9 / 5 + 32;
-}
-
-function formatTemp(c: number, unit: "C" | "F") {
-  const val = unit === "F" ? toFahrenheit(c) : c;
-  return `${val.toFixed(1)}°${unit}`;
-}
-
 export default function Home() {
   const [locationIdx, setLocationIdx] = useState(0);
-  const [tempUnit, setTempUnit] = useState<"C" | "F">("C");
+  const [tempUnit, setTempUnit] = useState<TemperatureUnit>("C");
   const loc = LOCATIONS[locationIdx];
 
   const { data, isLoading, isError, error } = useClimateData({
