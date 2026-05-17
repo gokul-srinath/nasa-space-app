@@ -7,7 +7,7 @@ import { formatTemp, type TemperatureUnit } from "@/lib/temperature";
 const LOCATIONS = [
   { label: "Cape Canaveral, FL", lat: "28.6", lon: "-80.6" },
   { label: "New Delhi, India", lat: "28.60", lon: "77.20" },
-  { label: "London, UK", lat: "51.5", lon: "-0.1" },
+  // { label: "London, UK", lat: "51.5", lon: "-0.1" },
   { label: "Tokyo, Japan", lat: "35.7", lon: "139.7" },
   { label: "São Paulo, Brazil", lat: "-23.5", lon: "-46.6" },
   { label: "Sydney, Australia", lat: "-33.9", lon: "151.2" },
